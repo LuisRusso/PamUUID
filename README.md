@@ -63,7 +63,7 @@ necessary components, but check with your distribution if it is located
 elsewhere. If the directory exists then insert the pendrive you intend to
 use and list the directory again. Check that a new file appears. The name
 of the file corresponds to the uuid of the filesystem in the drive. It will
-be unique to your system but it should have the folowing format:
+be unique to your system and it should have the folowing format:
 
 * For most filesystems 32 hex digits separated as
   xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx (version 4 UUIDs), e.g.,
@@ -84,26 +84,54 @@ ls -lh /dev/disks/by-uuid/
 This lists the devices associated to the UUIDs, for all the partitions in
 your system.
 
-You can now edit the file pam_uuid.h file.
+You can now edit the file pam_uuid.h file. Locate this line.
 
-TODO ...
+{"John", "/dev/disk/by-uuid/", "7cec6c81-9eaa-44ad-8d6c-e607f3101627", plain},
 
+If your username is John then congratulations you only need to change the
+UUID, the third entry in the list. Otherwise update the username also ;-)
 
-A step by step series of examples that tell you how to get a development env running
+For now the only authentication method is plain, so leave it.
 
-Say what the step will be
-
-```
-Give the example
-```
-
-And repeat
+We are now ready to compile the module, run
 
 ```
-until finished
+make
 ```
 
-End with an example of getting some data out of the system or using it for a little demo
+After it compiles successfully. You now need to install it as root:
+
+```
+sudo make install
+```
+
+This copies the module to the /lib/security directory. You can list the
+directory to make sure it is Ok. If the directory does not exist check with
+your distribution and copy to the appropriate location.
+
+The final step is authorizing the module edit the /etc/pam.d/common-auth
+file. Add the following line before any other authorization:
+
+```
+auth sufficient pam_uuid.so
+```
+
+In this case the module become sufficient for authentication. You may use
+more elaborated configurations, for example in a two-factor authentication
+process, check this
+[Guide](http://www.linux-pam.org/Linux-PAM-html/Linux-PAM_SAG.html).
+
+## Post Install
+
+If you want to remove this module just execute as root
+
+```
+make deinstall
+```
+
+This deletes the module from the /lib/security directory. In case this
+application did not met your expectations or you need some specific feature
+consider creating an issue about it.
 
 ## Contributing
 
