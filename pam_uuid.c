@@ -24,16 +24,10 @@
 /* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE */
 /* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
-
-/* ******************************************************** */
-/* Edit this string to the correct UUID and EVDEV directory */
-#define UUIDFILE "/dev/disk/by-uuid/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-
-/* ******************************************************** */
-
 #define _PAMUUID_VERSION "0.1.0-alpha"
 
 #include <unistd.h>
+#include <string.h>
 
 #define PAM_SM_AUTH
 #include <security/pam_modules.h>
@@ -42,6 +36,21 @@
 
 /* Proper logging */
 #include <syslog.h>
+
+#define LENGTH(X)               (sizeof X / sizeof X[0])
+
+enum authentication_method{ plain };
+
+typedef struct rule Rule;
+struct rule {
+  const char *UserName;
+  const char *Directory;
+  const char *UUID;
+  enum authentication_method Method;
+};
+
+/* Include user configuration */
+#include "pam_uuid.h"
 
 PAM_EXTERN
 int pam_sm_authenticate(pam_handle_t *pamh,
@@ -52,30 +61,43 @@ int pam_sm_authenticate(pam_handle_t *pamh,
 {
   const char *user;
   const char *tty;
-  int retval; /* Store return values from functions. */
 
-  pam_syslog(pamh, LOG_USER|LOG_DEBUG , "No worries for now.\n");
+  pam_syslog(pamh, LOG_USER|LOG_DEBUG , "PamUUID: activated by authenticate.\n");
+
+  if(pam_get_item(pamh, PAM_TTY,
+		  (const void **)(const void *)&tty) != PAM_SUCCESS
+     || (NULL != tty && 0 == strncmp(tty, "ssh", 3))
+     ){
+    pam_syslog(pamh, LOG_USER|LOG_DEBUG , "PamUUID: FAILED, call by ssh.\n");
+    return (PAM_AUTH_ERR);
+  }
 
   if (PAM_SUCCESS != pam_get_user(pamh, &user, NULL)
       || NULL == user
       || '\0' == *user
-      || 0 != strncmp(user, "xxxx", 3)
       ){
-    pam_syslog(pamh, LOG_USER|LOG_DEBUG , "Unable to get pam user.\n");
+    pam_syslog(pamh, LOG_USER|LOG_DEBUG , "PamUUID: FAILED, unable to get user.\n");
     return (PAM_AUTH_ERR);
   }
 
-  if(pam_get_item(pamh, PAM_TTY,
-  		  (const void **)(const void *)&tty) != PAM_SUCCESS
-     || (NULL != tty && 0 == strncmp(tty, "ssh", 3))
-     ){
-    return (PAM_AUTH_ERR);
+  for(int i = 0; i < LENGTH(rules); i++){
+    if(0 == strcmp(user, rules[i].UserName)){
+      int k = 1;
+      k += strlen(rules[i].Directory);
+      k += strlen(rules[i].UUID);
+      char FileName[k];
+      FileName[0] = '\0';
+      strcpy(FileName, rules[i].Directory);
+      strcat(FileName, rules[i].UUID);
+
+      if(0 == access(FileName, F_OK)){
+	pam_syslog(pamh, LOG_USER|LOG_DEBUG , "PamUUID: Access granted.\n");
+	return (PAM_SUCCESS);
+      }
     }
-
-  if(!access(UUIDFILE, F_OK)){
-    return (PAM_SUCCESS);
   }
 
+  pam_syslog(pamh, LOG_USER|LOG_DEBUG , "PamUUID: FAILED, no authentication rule.\n");
   return (PAM_AUTH_ERR);
 }
 
