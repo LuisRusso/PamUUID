@@ -31,16 +31,17 @@
 
 /* ******************************************************** */
 
-#include <stdio.h>
+#define _PAMUUID_VERSION "0.1.0-alpha"
+
 #include <unistd.h>
 
 #define PAM_SM_AUTH
 #include <security/pam_modules.h>
 #include <security/_pam_macros.h>
+#include <security/pam_ext.h>
 
 /* Proper logging */
 #include <syslog.h>
-#include <security/pam_ext.h>
 
 PAM_EXTERN
 int pam_sm_authenticate(pam_handle_t *pamh,

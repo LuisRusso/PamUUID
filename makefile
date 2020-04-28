@@ -27,16 +27,20 @@
 # save to /lib/security as root
 .PHONY: install deinstall clean
 
-pam_uuid.so: main.c
-	gcc -fPIC -c $<
-	gcc -shared -o $@ main.o -lpam
+pam_uuid.so:
+%.so: %.h %.c
+	gcc -fPIC -fno-stack-protector -c $^
+	ld -x --shared -o $@ $*.o
 
-clean:
-	rm pam_uuid.so
+test: test.c
+	gcc -o $@ $^ -lpam -lpam_misc
 
 # Run as root
 install: pam_uuid.so
 	cp $< /lib/security
+
+clean:
+	-rm -f pam_uuid.h.gch pam_uuid.o pam_uuid.so test
 
 deinstall:
 	rm /lib/security/pam_uuid.so
