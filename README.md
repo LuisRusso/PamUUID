@@ -234,16 +234,16 @@ the [LICENSE file] for details
 [Linux-PAM]: http://www.linux-pam.org/
 [Debian]: https://www.debian.org/
 [Wikipedia]: https://en.wikipedia.org/wiki/Universally_unique_identifier
-[issue]: ./issues
+[issue]: ../../issues
 [lmsrusso@gmail.com]: mailto:lmsrusso@gmail.com
 [e2label]: http://e2fsprogs.sourceforge.net
 [fatlabel]: https://github.com/dosfstools/dosfstools
 [sxlock]: https://github.com/lahwaacz/sxlock
 [SemVer]: http://semver.org/
-[tags]: ./tags
+[tags]: ../../tags
 [LuisRusso]: https://github.com/LuisRusso
-[contributors]: ./contributors
-[LICENSE file]: ../blob/master/LICENSE
+[contributors]: ../../contributors
+[LICENSE file]: ./LICENSE
 [pamusb]: http://www.pamusb.org/
 [suckless]: https://suckless.org/
 [PurpleBooth]: https://gist.github.com/PurpleBooth
