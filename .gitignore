@@ -53,3 +53,4 @@ dkms.conf
 
 # Ignore user personal config
 pam_uuid.h
+pam_uuid.h~
