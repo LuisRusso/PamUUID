@@ -32,6 +32,9 @@ pam_uuid.so:
 	gcc -fPIC -fno-stack-protector -c $<
 	ld -x --shared -o $@ $*.o
 
+pam_uuid.h: template.h
+	cp $< $@
+
 # Run as root
 install: pam_uuid.so
 	cp $< /lib/security
