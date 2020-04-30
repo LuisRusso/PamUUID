@@ -96,8 +96,14 @@ ls -lh /dev/disk/by-uuid/
 This lists the devices associated to the UUIDs, for all the partitions in
 your system.
 
-You can now edit the file pam_uuid.h file. This file was created by the
-initial make. Locate the following line:
+You can now edit the file `pam_uuid.h` file. This file was created by the
+initial make.
+
+```
+editor pam_uuid.h
+```
+
+Locate the following line:
 
 `{"John", "/dev/disk/by-uuid/", "7cec6c81-9eaa-44ad-8d6c-e607f3101627", plain},`
 

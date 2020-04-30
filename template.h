@@ -4,7 +4,7 @@
 /* The format is as described. An example is given for the user John. */
 /* You may modify the given line. The other lines are comments. */
 
-/* In version 0.1.0 the only available authentication method is plain. */
+/* In version 0.1.0-alpha.2 the only available authentication method is plain. */
 
 static const Rule rules[] =
   {
