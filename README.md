@@ -196,8 +196,8 @@ again. Check that a new file appears.
 
 In FreeBSD the file should look something like
 `DISK-7CEC6C819EAA44AD8D6CE607` and is associated to the device not the
-partition. In fact there should also be partition files that end in `s0`,
-`s1`, etc.
+partition. In fact there should also be partition files that end in `s1`,
+`s2`, etc.
 
 You can now edit the file `pam_uuid.h` file. This file was created by the
 initial make.
