@@ -24,23 +24,29 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-# save to /lib/security as root
+.POSIX:
 .PHONY: install deinstall clean
 
-pam_uuid.so:
-%.so: %.c %.h
-	gcc -fPIC -fno-stack-protector -c $<
-	ld -x --shared -o $@ $*.o
+LIBDIR = $$( \
+    case $$(uname -s) in \
+        ( Linux ) echo '/lib/security' ;; \
+        ( FreeBSD ) echo '/usr/lib' ;; \
+        ( * ) echo './' ;; \
+    esac )
+
+pam_uuid.so: pam_uuid.c pam_uuid.h
+	cc -fPIC -fno-stack-protector -c pam_uuid.c
+	ld -x --shared -o pam_uuid.so pam_uuid.o
 
 pam_uuid.h: template.h
-	cp $< $@
+	cp template.h pam_uuid.h
 
 # Run as root
 install: pam_uuid.so
-	cp $< /lib/security
+	cp pam_uuid.so $(LIBDIR)
 
 clean:
 	-rm -f pam_uuid.h.gch pam_uuid.o pam_uuid.so
 
 deinstall:
-	rm /lib/security/pam_uuid.so
+	rm $(LIBDIR)/pam_uuid.so

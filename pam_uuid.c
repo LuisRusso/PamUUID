@@ -24,15 +24,47 @@
 /* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE */
 /* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
-#define _PAMUUID_VERSION "0.1.0-alpha.2"
+#define _PAMUUID_VERSION "0.2.0-alpha"
 
 #include <unistd.h>
 #include <string.h>
 
+/* __linux__       Defined on Linux */
+/* __sun           Defined on Solaris */
+/* __FreeBSD__     Defined on FreeBSD */
+/* __NetBSD__      Defined on NetBSD */
+/* __OpenBSD__     Defined on OpenBSD */
+/* __APPLE__       Defined on Mac OS X */
+/* __hpux          Defined on HP-UX */
+/* __osf__         Defined on Tru64 UNIX (formerly DEC OSF1) */
+/* __sgi           Defined on Irix */
+/* _AIX            Defined on AIX */
+
+#if defined(__linux__)
 #define PAM_SM_AUTH
 #include <security/pam_modules.h>
 #include <security/_pam_macros.h>
 #include <security/pam_ext.h>
+#endif /* defined(__linux__) */
+
+#if defined(__FreeBSD__)
+#define PAM_SM_AUTH
+#include <sys/types.h>
+#include <security/pam_modules.h>
+#include <security/pam_appl.h>
+#include <syslog.h>
+#include <stdarg.h>
+
+void
+pam_syslog(pam_handle_t *pamh,
+	   int priority,
+	   const char *fmt,
+	   ...
+	   )
+{
+  syslog(priority, "%s", fmt);
+}
+#endif /* defined(__FreeBSD__) */
 
 /* Proper logging */
 #include <syslog.h>
@@ -52,12 +84,12 @@ struct rule {
 /* Include user configuration */
 #include "pam_uuid.h"
 
-PAM_EXTERN
-int pam_sm_authenticate(pam_handle_t *pamh,
-			int flags,
-			int argc,
-			const char **argv
-			)
+PAM_EXTERN int
+pam_sm_authenticate(pam_handle_t *pamh,
+		    int flags,
+		    int argc,
+		    const char **argv
+		    )
 {
   const char *user;
   const char *tty;
@@ -101,12 +133,12 @@ int pam_sm_authenticate(pam_handle_t *pamh,
   return (PAM_AUTH_ERR);
 }
 
-PAM_EXTERN
-int pam_sm_setcred(pam_handle_t *pamh,
-		   int flags,
-		   int argc,
-		   const char **argv
-		   )
+PAM_EXTERN int
+pam_sm_setcred(pam_handle_t *pamh,
+	       int flags,
+	       int argc,
+	       const char **argv
+	       )
 {
   return (PAM_SUCCESS);
 }

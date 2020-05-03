@@ -1,14 +1,16 @@
-# PamUUID 0.1.0-alpha.2
+# PamUUID 0.2.0-alpha
 
 A PAM authentication module for Linux using USB Flash Drives. This module
 will allow you to login to your system by inserting a USB drive, without
-needing to type a password.
+the need to type a password.
 
 ## Table of contents
 
 - [Getting Started]
    - [Prerequisites]
    - [Installing]
+       - [Linux Install]
+       - [FreeBSD Install]
 - [FAQ]
 - [Contributing]
 - [Versioning]
@@ -35,16 +37,29 @@ git clone git@github.com:LuisRusso/PamUUID.git
 
 ### Prerequisites
 
-The following components are used to install this software.
+This package was tested with [Debian] and [FreeBSD], it will most likely
+work with other Linux distributions and UNIX variants. Some version of the
+following components must exist in the system.
 
-* linux and systemd (or similar)
-* gcc, GNU compiler collection
-* GNU Make
+For Linux:
+
+* [udev] (or similar, e.g., [eudev])
+* C compiler, [gcc] or [clang]
+* [GNU Make]
 * [Linux-PAM]
+
+For FreeBSD:
+
+* [devd]
+* C compiler, [gcc] or [clang]
+* [Make]
+* [PAM library]
 
 ### Installing
 
-First check that you have the Linux-PAM lib installed. In [Debian] this can
+#### Linux Install
+
+First check that you have the PAM library is installed. In [Debian] this can
 be obtained by running:
 
 ```
@@ -58,36 +73,40 @@ project. Simply execute
 make
 ```
 
-If all went well your build system is working with Linux-PAM, gcc, make,
-etc. Otherwise if the Linux-PAM lib is missing your compile will complain
-about this line.
+If all went well your build system is working. Otherwise if the PAM
+lib is missing your compile will complain about this line.
 
 `#include <security/pam_modules.h>`
 
-Next determine if your system has the appropriate linux, systemd, udev
+Next determine if your system has the appropriate udev
 components. List the directory `/dev/disk/by-uuid/` with:
 
 ```
 ls /dev/disk/by-uuid/
 ```
 
-If this directory does not exist then you, most likely, do not have the
+This directory should exist. Otherwise you, most likely, do not have the
 necessary components. Check with your distribution if it is located
-elsewhere. If the directory exists then insert the pendrive you intend to
-use and list the directory again. Check that a new file appears. The name
-of the file corresponds to the uuid of the filesystem in the drive. It will
-be unique to your system and it should have the folowing format:
+elsewhere.
+
+Now insert the pendrive you intend to use and list the directory
+again. Check that a new file appears.
+
+The name of the file corresponds to the uuid of the filesystem in the
+drive. It will be unique to your system and it should have the folowing
+format:
 
 * For most filesystems 32 hex digits separated as
   xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx (version 4 UUIDs), e.g.,
-  7cec6c81-9eaa-44ad-8d6c-e607f3101627.
+  `7cec6c81-9eaa-44ad-8d6c-e607f3101627`.
 
 * For vfat filesystems 8 hex digits separated as xxxx-xxxx, e.g.,
-  4059-33BB.
+  `4059-33BB`.
 
 For more info check [Wikipedia].
 
 If several files appeared or you are unsure about the correct UUID to use
+you can run the following command:
 
 ```
 ls -lh /dev/disk/by-uuid/
@@ -105,7 +124,7 @@ editor pam_uuid.h
 
 Locate the following line:
 
-`{"John", "/dev/disk/by-uuid/", "7cec6c81-9eaa-44ad-8d6c-e607f3101627", plain},`
+`   {"John", "/dev/disk/by-uuid/", "7cec6c81-9eaa-44ad-8d6c-e607f3101627", plain},`
 
 If your username is John then congratulations you only need to change the
 UUID, the third entry in the list. Otherwise update the username also ;-)
@@ -130,11 +149,99 @@ This copies the module to the `/lib/security` directory. You can list the
 directory to make sure it is Ok. If the directory does not exist check with
 your distribution and copy to the appropriate location.
 
-The final step is authorizing the module. Edit the `/etc/pam.d/common-auth`
-file as root.
+The final step is authorizing the module. Edit the
+`/etc/pam.d/common-auth` file as root.
 
 ```
 sudo editor /etc/pam.d/common-auth
+```
+
+Add the following line before any other authorization:
+
+```
+auth sufficient pam_uuid.so
+```
+
+In this case the module becomes sufficient for authentication. You may use
+more elaborated configurations, for example a two-factor authentication
+process.
+
+#### FreeBSD Install
+
+First check that you have the PAM library is installed. Make sure you
+installed the system with the dev option. You can check if everything is ok
+by compiling the project. Simply execute
+
+```
+make
+```
+
+If all went well your build system is working. Otherwise if the PAM
+lib is missing your compile will complain about this line.
+
+`#include <security/pam_modules.h>`
+
+Next determine if your system has the appropriate devd
+components. List the directory `/dev/diskid/` with:
+
+```
+ls /dev/diskid/
+```
+
+In FreeBSD this directory might not exist and everything is Ok. The
+directory will show up when you insert the pendrive.
+
+Now insert the pendrive you intend to use and list the directory
+again. Check that a new file appears.
+
+In FreeBSD the file should look something like
+`DISK-7CEC6C819EAA44AD8D6CE607` and is associated to the device not the
+partition. In fact there should also be partition files that end in `s0`,
+`s1`, etc.
+
+You can now edit the file `pam_uuid.h` file. This file was created by the
+initial make.
+
+```
+editor pam_uuid.h
+```
+
+Comment out the line:
+
+`   {"John", "/dev/disk/by-uuid/", "7cec6c81-9eaa-44ad-8d6c-e607f3101627", plain},`
+
+and uncomment the line
+
+`   /* {"John", "/dev/diskid/", "DISK-7CEC6C819EAA44AD8D6CE607", plain}, */`
+
+If your username is John then congratulations you only need to change the
+diskid file, the third entry in the list. Otherwise update the username
+also ;-)
+
+You can also add more of these lines, for other users, or other pens.
+
+For now the only authentication method is plain, so leave it.
+
+Next compile the module. Run
+
+```
+make
+```
+
+After it compiles successfully you need to install it as root:
+
+```
+sudo make install
+```
+
+This copies the module to the `/usr/lib` directory. You can list the
+directory to make sure it is Ok.
+
+The final step is authorizing the module. Edit the file
+`/etc/pam.d/login` as root.
+
+```
+sudo editor /etc/pam.d/login
 ```
 
 Add the following line before any other authorization:
@@ -162,9 +269,9 @@ root. Execute
 sudo make deinstall
 ```
 
-This deletes the module from the `/lib/security` directory. In case the
-module did not met your expectations or you need some specific feature
-consider creating an [issue] about it or emailing me [lmsrusso@gmail.com].
+This deletes the module from the install directory. In case the module did
+not met your expectations or you need some specific feature consider
+creating an [issue] about it or emailing me [lmsrusso@gmail.com].
 
 > This module is pretty cool. How can I help?
 
@@ -176,10 +283,10 @@ just send a "thank you" email to [lmsrusso@gmail.com].
 No. All that the module does is to check if the file exists in your
 filesystem. Therefore you can use any file, whatsoever. That being said, it
 is probably a bad idea to use a file that resides permanently in the
-filesystem. However you may want to use the labels of the
-filesystems. These reside in `/dev/disk/by-label`. In this case you may
-need to use [e2label] for ext filesystems or [fatlabel] for fat
-filesystems.
+filesystem. However you may want to use the labels of the filesystems. In
+linux these reside in `/dev/disk/by-label`. In this case you may need to
+use [e2label] for ext filesystems or [fatlabel] for fat filesystems. In
+FreeBSD you might want to look into [glabel].
 
 If you have a spare pen you may want to use it as a backup authentication
 pen. Just in case you lose your primary pen. In this case just use the same
@@ -230,6 +337,8 @@ the [LICENSE file] for details
 [Getting Started]: #getting-started
 [Prerequisites]: #prerequisites
 [Installing]: #installing
+[Linux Install]: #linux-install
+[FreeBSD Install]: #freebsd-install
 [FAQ]: #faq
 [Contributing]: #contributing
 [Versioning]: #versioning
@@ -237,13 +346,23 @@ the [LICENSE file] for details
 [License]: #license
 [Acknowledgments]: #acknowledgments
 
-[Linux-PAM]: http://www.linux-pam.org/
 [Debian]: https://www.debian.org/
+[FreeBSD]: https://www.freebsd.org/
+[udev]: https://en.wikipedia.org/wiki/Udev
+[eudev]: https://wiki.gentoo.org/wiki/Eudev
+[gcc]: https://gcc.gnu.org/
+[clang]: https://clang.llvm.org/
+[GNU Make]: https://www.gnu.org/software/make/
+[Linux-PAM]: http://www.linux-pam.org/
+[devd]: https://www.freebsd.org/cgi/man.cgi?query=devd&sektion=8&apropos=0&manpath=FreeBSD+12.1-RELEASE+and+Ports
+[Make]: https://www.freebsd.org/doc/en/books/developers-handbook/tools-make.html
+[PAM library]: https://www.freebsd.org/doc/en/articles/pam/article.html
 [Wikipedia]: https://en.wikipedia.org/wiki/Universally_unique_identifier
 [issue]: ../../issues
 [lmsrusso@gmail.com]: mailto:lmsrusso@gmail.com
 [e2label]: http://e2fsprogs.sourceforge.net
 [fatlabel]: https://github.com/dosfstools/dosfstools
+[glabel]: https://www.freebsd.org/cgi/man.cgi?query=glabel&sektion=8&manpath=freebsd-release-ports
 [sxlock]: https://github.com/lahwaacz/sxlock
 [SemVer]: http://semver.org/
 [tags]: ../../tags
