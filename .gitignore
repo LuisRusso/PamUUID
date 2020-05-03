@@ -55,6 +55,9 @@ dkms.conf
 pam_uuid.h
 pam_uuid.h~
 
+# Ignore README previews
+README.html
+
 # Ignore emacs edits
 README.md~
 makefile~
