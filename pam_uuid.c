@@ -43,15 +43,15 @@
 #if defined(__linux__)
 #define PAM_SM_AUTH
 #include <security/pam_modules.h>
-#include <security/pam_constants.h>
-/* #include <security/pam_ext.h> */
+#include <security/_pam_macros.h>
+#include <security/pam_ext.h>
 #endif /* defined(__linux__) */
 
 #if defined(__FreeBSD__)
 #define PAM_SM_AUTH
 #include <sys/types.h>
-#include <security/pam_appl.h>
 #include <security/pam_modules.h>
+#include <security/pam_appl.h>
 #include <syslog.h>
 #include <stdarg.h>
 
@@ -84,12 +84,12 @@ struct rule {
 /* Include user configuration */
 #include "pam_uuid.h"
 
-PAM_EXTERN
-int pam_sm_authenticate(pam_handle_t *pamh,
-			int flags,
-			int argc,
-			const char **argv
-			)
+PAM_EXTERN int
+pam_sm_authenticate(pam_handle_t *pamh,
+		    int flags,
+		    int argc,
+		    const char **argv
+		    )
 {
   const char *user;
   const char *tty;
@@ -133,12 +133,12 @@ int pam_sm_authenticate(pam_handle_t *pamh,
   return (PAM_AUTH_ERR);
 }
 
-PAM_EXTERN
-int pam_sm_setcred(pam_handle_t *pamh,
-		   int flags,
-		   int argc,
-		   const char **argv
-		   )
+PAM_EXTERN int
+pam_sm_setcred(pam_handle_t *pamh,
+	       int flags,
+	       int argc,
+	       const char **argv
+	       )
 {
   return (PAM_SUCCESS);
 }

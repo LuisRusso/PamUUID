@@ -27,12 +27,12 @@
 .POSIX:
 .PHONY: install deinstall clean
 
-LIBDIR = /lib/security
-
-.ifdef FREEBSD
-LIBDIR = /usr/lib
-.endif
-# make -D FREEBSD deinstall
+LIBDIR = $$( \
+    case $$(uname -s) in \
+        ( Linux ) echo '/lib/security' ;; \
+        ( FreeBSD ) echo '/usr/lib' ;; \
+        ( * ) echo './' ;; \
+    esac )
 
 pam_uuid.so: pam_uuid.c pam_uuid.h
 	cc -fPIC -fno-stack-protector -c pam_uuid.c
