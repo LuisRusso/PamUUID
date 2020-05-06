@@ -333,6 +333,8 @@ the [LICENSE file] for details
 * This project was inspired by the [pamusb] project.
 * This software uses a [suckless] approach.
 * Thanks to [PurpleBooth] for the [README-Template].
+* The [grip] tool by [Joe Esposito] was very handy for producing this file.
+
 
 [Getting Started]: #getting-started
 [Prerequisites]: #prerequisites
@@ -373,3 +375,5 @@ the [LICENSE file] for details
 [suckless]: https://suckless.org/
 [PurpleBooth]: https://gist.github.com/PurpleBooth
 [README-Template]: https://gist.github.com/PurpleBooth/109311bb0361f32d87a2
+[grip]: https://github.com/joeyespo/grip
+[Joe Esposito]: https://github.com/joeyespo
