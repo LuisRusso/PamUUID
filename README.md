@@ -1,4 +1,4 @@
-# PamUUID 0.2.0-alpha.1
+# PamUUID 0.2.0-alpha.2
 
 A PAM authentication module for Linux using USB Flash Drives. This module
 will allow you to login to your system by inserting a USB drive, without
