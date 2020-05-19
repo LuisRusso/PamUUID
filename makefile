@@ -43,6 +43,7 @@ pam_uuid.h: template.h
 
 # Run as root
 install: pam_uuid.so
+	if [ ! -d $(LIBDIR) ] ; then mkdir $(LIBDIR) ; fi
 	cp pam_uuid.so $(LIBDIR)
 
 clean:
