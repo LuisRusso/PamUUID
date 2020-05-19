@@ -38,7 +38,7 @@ pam_uuid.so: pam_uuid.c pam_uuid.h
 	cc -fPIC -fno-stack-protector -c pam_uuid.c
 	ld -x --shared -o pam_uuid.so pam_uuid.o
 
-pam_uuid.h: template.h
+pam_uuid.h:
 	cp template.h pam_uuid.h
 
 # Run as root
