@@ -1,4 +1,4 @@
-# PamUUID 0.2.0-alpha.2
+# PamUUID 0.3.0-alpha
 
 A PAM authentication module for Linux using USB Flash Drives. This module
 will allow you to login to your system by inserting a USB drive, without
@@ -131,7 +131,9 @@ UUID, the third entry in the list. Otherwise update the username also ;-)
 
 You can also add more of these lines, for other users, or other pens.
 
-For now the only authentication method is plain, so leave it.
+The `plain` authentication method succeeds if the file exists. This is the
+most common use case. The `delete` method requires that the file exists and
+moreover unlinks it. It only succeeds if both operations are successfull.
 
 Next compile the module. Run
 
@@ -283,10 +285,13 @@ just send a "thank you" email to [lmsrusso@gmail.com].
 No. All that the module does is to check if the file exists in your
 filesystem. Therefore you can use any file, whatsoever. That being said, it
 is probably a bad idea to use a file that resides permanently in the
-filesystem. However you may want to use the labels of the filesystems. In
-linux these reside in `/dev/disk/by-label`. In this case you may need to
-use [e2label] for ext filesystems or [fatlabel] for fat filesystems. In
-FreeBSD you might want to look into [glabel].
+filesystem. The `delete` authentication method may be more usefull in this
+case, as it unlinks the corresponding file during the authentication process.
+
+You can also use the labels of the filesystems. In linux these reside in
+`/dev/disk/by-label`. In this case you may need to use [e2label] for ext
+filesystems or [fatlabel] for fat filesystems. In FreeBSD you might want to
+look into [glabel].
 
 If you have a spare pen you may want to use it as a backup authentication
 pen. Just in case you lose your primary pen. In this case just use the same

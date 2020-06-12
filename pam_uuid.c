@@ -24,7 +24,7 @@
 /* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE */
 /* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
-#define _PAMUUID_VERSION "0.2.0-alpha.2"
+#define _PAMUUID_VERSION "0.3.0-alpha"
 
 #include <unistd.h>
 #include <string.h>
@@ -71,7 +71,7 @@ pam_syslog(pam_handle_t *pamh,
 
 #define LENGTH(X)               (sizeof X / sizeof X[0])
 
-enum authentication_method{ plain };
+enum authentication_method{ plain, delete };
 
 typedef struct rule Rule;
 struct rule {
@@ -123,8 +123,15 @@ pam_sm_authenticate(pam_handle_t *pamh,
       strcat(FileName, rules[i].UUID);
 
       if(0 == access(FileName, F_OK)){
-	pam_syslog(pamh, LOG_USER|LOG_DEBUG , "PamUUID: Access granted.\n");
-	return (PAM_SUCCESS);
+	if(plain == rules[i].Method){
+	  pam_syslog(pamh, LOG_USER|LOG_DEBUG , "PamUUID: Access granted.\n");
+	  return (PAM_SUCCESS);
+	}
+	if(delete == rules[i].Method &&
+	   0 == unlink(FileName)){
+	  pam_syslog(pamh, LOG_USER|LOG_DEBUG , "PamUUID: Access granted.\n");
+	  return (PAM_SUCCESS);
+	}
       }
     }
   }
